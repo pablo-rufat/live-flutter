@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:writers/components/text_field_container.dart';
 import 'package:writers/constants.dart';
+import 'package:writers/models/User.dart';
 
 class LanguagesDropdown extends StatefulWidget {
-  const LanguagesDropdown({Key? key}) : super(key: key);
+  final ValueChanged<String?> onChange;
+  const LanguagesDropdown({Key? key, required this.onChange}) : super(key: key);
 
   @override
   _LanguagesDropdownState createState() => _LanguagesDropdownState();
@@ -33,6 +35,20 @@ class _LanguagesDropdownState extends State<LanguagesDropdown> {
               setState(() {
                 dropdownValue = value!;
               });
+              switch (value) {
+                case 'English':
+                  widget.onChange("EN");
+                  break;
+                case 'Español':
+                  widget.onChange("ES");
+                  break;
+                case 'Português':
+                  widget.onChange("PT");
+                  break;
+                default:
+                  widget.onChange("PT");
+                  break;
+              }
             },
             underline: Container(),
             items: <String>[

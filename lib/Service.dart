@@ -1,13 +1,16 @@
+import 'package:writers/models/AuthPayload.dart';
+
 class Service {
   static final Service _instance = Service._internal();
   factory Service() => _instance;
 
   Service._internal() {
-    _currentUser = {};
+    _currentUser = new AuthPayload(token: null, user: null);
   }
 
-  late Object _currentUser;
+  late AuthPayload _currentUser;
 
-  Object get currentUser => _currentUser;
-  set currentUser(Object currentUser) => _currentUser = currentUser;
+  AuthPayload get currentUser => _currentUser;
+
+  set currentUser(AuthPayload currentUser) => _currentUser = currentUser;
 }
