@@ -30,28 +30,38 @@ class Chapter {
   });
 
   factory Chapter.fromJson(Map<String, dynamic> json) {
-    print(json['children']);
     return Chapter(
       id: json['id'],
-      text: json['text'],
-      depth: json['depth'],
+      text: json['text'] ?? null,
+      depth: json['depth'] ?? null,
       children: json['children'] != null
           ? List<Chapter>.from(
               json['children'].map((model) => Chapter.fromJson(model)))
           : [],
       parent: json['parent'] != null ? Chapter.fromJson(json['parent']) : null,
-      author: User.fromJson(json['author']),
-      createdAt: json['createdAt'],
+      author: json['author'] != null ? User.fromJson(json['author']) : null,
+      createdAt: json['createdAt'] ?? null,
       votes: json['votes'] != null
           ? List<Vote>.from(json['votes'].map((model) => Vote.fromJson(model)))
           : [],
-      storyId: json['storyId'],
-      status: enumFromString(Status.values, json['status']),
+      storyId: json['storyId'] ?? null,
+      status: json['status'] != null
+          ? enumFromString(Status.values, json['status'])
+          : null,
     );
   }
 
   @override
   String toString() {
-    return 'Chapter: {id: $id, text: $text, depth: $depth, children: $children }';
+    return """Chapter: {
+      id: '$id',
+      text: '$text',
+      depth: $depth,
+      parent: $parent,
+      author: $author,
+      createdAt: '$createdAt',
+      storyId: '$storyId',
+      status: '$status'
+    }""";
   }
 }

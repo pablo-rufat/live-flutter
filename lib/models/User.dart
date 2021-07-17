@@ -8,13 +8,13 @@ enum Languages { ES, PT, EN }
 
 class User {
   final String id;
-  final String name;
-  final String email;
+  final String? name;
+  final String? email;
   final List<Chapter> chapters;
   final List<Vote> votes;
-  final Roles role;
-  final Languages language;
-  final String bookmark;
+  final Roles? role;
+  final Languages? language;
+  final String? bookmark;
 
   User({
     required this.id,
@@ -30,8 +30,8 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'],
-      name: json['name'],
-      email: json['email'],
+      name: json['name'] ?? null,
+      email: json['email'] ?? null,
       chapters: json['chapters'] != null
           ? List<Chapter>.from(
               json['chapters'].map((model) => Chapter.fromJson(model)))
@@ -39,9 +39,13 @@ class User {
       votes: json['votes'] != null
           ? List<Vote>.from(json['votes'].map((model) => Vote.fromJson(model)))
           : [],
-      role: enumFromString(Roles.values, json['role']),
-      language: enumFromString(Languages.values, json['language']),
-      bookmark: json['bookmark'],
+      role: json['role'] != null
+          ? enumFromString(Roles.values, json['role'])
+          : null,
+      language: json['language'] != null
+          ? enumFromString(Languages.values, json['language'])
+          : null,
+      bookmark: json['bookmark'] ?? null,
     );
   }
 

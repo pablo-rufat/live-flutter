@@ -94,7 +94,7 @@ class ApiService {
     }
   }
 
-  static Future<Story?> fetchStory(String language) async {
+  static Future<Story> fetchStory(String language) async {
     var login = {
       "query": """query {
           story(language: $language) {
@@ -114,13 +114,18 @@ class ApiService {
 
     if (response.statusCode == 200) {
       var body = jsonDecode(response.body)['data']['story'];
-      return body != null ? Story.fromJson(body) : null;
+      return Story.fromJson(body);
     } else {
       throw Exception("Failed to load Story");
     }
   }
 
-  static Future<Chapter?> fetchChapter(String chapterId) async {
+  static Future<Chapter> fetchFirstChapter(String language) async {
+    Story story = await fetchStory(language);
+    return fetchChapter(story.firstChapterId);
+  }
+
+  static Future<Chapter> fetchChapter(String chapterId) async {
     var login = {
       "query": """query {
           chapter(id: \"$chapterId\") {
@@ -136,6 +141,7 @@ class ApiService {
             }
             author {
               id
+              name
             }
             createdAt
             votes {
@@ -154,9 +160,36 @@ class ApiService {
 
     if (response.statusCode == 200) {
       var body = jsonDecode(response.body)['data']['chapter'];
-      return body != null ? Chapter.fromJson(body) : null;
+      return Chapter.fromJson(body);
     } else {
       throw Exception("Failed to load Chapter");
+    }
+  }
+
+  static Future<Story> createStory(String language, String text) async {
+    var login = {
+      "query": """mutation{
+        createStory(language: $language, text: "$text") {
+          id
+          language
+          createdAt
+          updatedAt
+          firstChapterId
+        }
+      }"""
+    };
+
+    final response = await http.post(
+        Uri.parse('https://writers-live-api.herokuapp.com/'),
+        body: jsonEncode(login),
+        headers: {"Content-Type": "application/json"});
+
+    if (response.statusCode == 200) {
+      var body = jsonDecode(response.body)['data']['story'];
+      return Story.fromJson(body);
+    } else {
+      print(response.body);
+      throw Exception("Failed to load Story");
     }
   }
 }

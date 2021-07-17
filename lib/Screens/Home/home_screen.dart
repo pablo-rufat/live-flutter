@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:writers/Screens/Home/components/HomeDrawer.dart';
+import 'package:writers/Screens/Home/components/body.dart';
 import 'package:writers/Service.dart';
 import 'package:writers/apiService.dart';
+import 'package:writers/constants.dart';
 import 'package:writers/models/Chapter.dart';
-import 'package:writers/models/Story.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -12,39 +14,77 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool isLoading = false;
   Service _service = Service();
-  Story? story;
-  Chapter? chapter;
+  late Future<Chapter>? futureChapter;
+  bool isBookmark = false;
 
-  Future fetchData() async {
-    story = await fetchStory();
+  @override
+  void initState() {
+    super.initState();
 
-    if (story != null) {
-      print(story!.firstChapterId);
-      chapter = await fetchChapter(story!.firstChapterId);
+    if (_service.currentUser.user!.bookmark != null) {
+      futureChapter = fetchChapter(_service.currentUser.user!.bookmark!);
+    } else {
+      futureChapter = fetchFirstChapter();
     }
-
-    print(story.toString());
-    print(chapter.toString());
+    // TODO: INIT BOOKMARK ICON
   }
 
-  Future<Story?> fetchStory() async {
-    story = await ApiService.fetchStory(
+  Future<Chapter>? fetchFirstChapter() async {
+    return ApiService.fetchFirstChapter(
         _service.currentUser.user!.language.toString().split('.').last);
-
-    return story;
   }
 
-  Future<Chapter?> fetchChapter(String chapterId) async {
-    chapter = await ApiService.fetchChapter(chapterId);
+  Future<Chapter>? fetchChapter(String chapterId) async {
+    return await ApiService.fetchChapter(chapterId);
+  }
 
-    return chapter;
+  Future<void> setBookmark() async {
+    // setar bookmark na api
   }
 
   @override
   Widget build(BuildContext context) {
-    fetchData();
-    return Container();
+    Size size = MediaQuery.of(context).size;
+    return Scaffold(
+        appBar: AppBar(title: Text('writers')),
+        drawer: HomeDrawer(),
+        body: FutureBuilder<Chapter>(
+          future: futureChapter,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Body(
+                      snapshot: snapshot,
+                      isBookmark: isBookmark,
+                      setBookmark: setBookmark,
+                    ),
+                    ButtonBar(
+                      buttonHeight: size.height * 0.1,
+                      alignment: MainAxisAlignment.center,
+                      children: [
+                        TextButton(
+                            onPressed: () {},
+                            child: Text(
+                              "Continue reading",
+                              style: TextStyle(color: primaryColor),
+                            )),
+                        TextButton(
+                            onPressed: () {},
+                            child: Text(
+                              "Create new chapter",
+                              style: TextStyle(color: primaryColor),
+                            ))
+                      ],
+                    ),
+                  ]);
+            } else if (snapshot.hasError) {
+              return Text("${snapshot.error}");
+            }
+            return Center(child: CircularProgressIndicator());
+          },
+        ));
   }
 }

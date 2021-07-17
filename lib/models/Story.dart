@@ -29,6 +29,12 @@ class Story {
 
   @override
   String toString() {
-    return 'User: {id: $id, name: $firstChapterId}';
+    return """Story: {
+      id: '$id',
+      language: '$language',
+      createdAt: '$createdAt',
+      updatedAt: '$updatedAt',
+      firstChapterId: '$firstChapterId'
+    }""";
   }
 }
