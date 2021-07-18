@@ -23,6 +23,7 @@ class _BodyState extends State<Body> {
   String password = "";
   Service _service = Service();
   bool isLoading = false;
+  final snackBar = SnackBar(content: Text('Invalid user or password'));
 
   login() async {
     setState(() {
@@ -33,22 +34,24 @@ class _BodyState extends State<Body> {
 
     _service.currentUser = await ApiService.login(email, password);
 
-    if (_service.currentUser.token != null) {
+    if (_service.currentUser.token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    } else {
       prefs.setString('token', _service.currentUser.token ?? "");
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) {
+            return HomeScreen();
+          },
+        ),
+      );
     }
 
     setState(() {
       isLoading = false;
     });
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) {
-          return HomeScreen();
-        },
-      ),
-    );
   }
 
   @override

@@ -14,7 +14,7 @@ class User {
   final List<Vote> votes;
   final Roles? role;
   final Languages? language;
-  final String? bookmark;
+  String? bookmark;
 
   User({
     required this.id,

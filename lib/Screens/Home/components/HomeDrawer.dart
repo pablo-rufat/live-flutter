@@ -72,8 +72,6 @@ class _HomeDrawerState extends State<HomeDrawer> {
             ListTile(
               title: Text('create Story'),
               onTap: () {
-                String text = loremipsum();
-                ApiService.createStory("ES", text);
                 Navigator.pop(context);
               },
             ),

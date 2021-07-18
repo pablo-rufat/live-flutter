@@ -1,5 +1,8 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart';
+import 'package:writers/Service.dart';
 import 'package:writers/models/AuthPayload.dart';
 import 'package:writers/models/Chapter.dart';
 import 'package:writers/models/Story.dart';
@@ -58,7 +61,13 @@ class ApiService {
         headers: {"Content-Type": "application/json"});
 
     if (response.statusCode == 200) {
-      return AuthPayload.fromJson(jsonDecode(response.body)['data']['signIn']);
+      var errors = jsonDecode(response.body)["errors"];
+      var signIn = jsonDecode(response.body)["data"]["signIn"];
+
+      if (errors != null) {
+        return AuthPayload(token: null, user: null);
+      }
+      return AuthPayload.fromJson(signIn);
     } else {
       throw Exception("Failed to signIn");
     }
@@ -166,30 +175,72 @@ class ApiService {
     }
   }
 
-  static Future<Story> createStory(String language, String text) async {
-    var login = {
-      "query": """mutation{
-        createStory(language: $language, text: "$text") {
-          id
-          language
-          createdAt
-          updatedAt
-          firstChapterId
-        }
-      }"""
+  static Future<User?> setBookmark(String bookmark) async {
+    Service _service = Service();
+
+    var bookmarkQuery = {
+      "query": """mutation {
+          setUserBookmark(chapterId: \"$bookmark\") {
+            id
+            name
+            email
+            role
+            language
+            bookmark
+          }
+        }"""
     };
 
     final response = await http.post(
         Uri.parse('https://writers-live-api.herokuapp.com/'),
-        body: jsonEncode(login),
-        headers: {"Content-Type": "application/json"});
+        body: jsonEncode(bookmarkQuery),
+        headers: {
+          "Content-Type": "application/json",
+          "authorization": "Bearer ${_service.currentUser.token}",
+        });
+
+    print(response.body);
 
     if (response.statusCode == 200) {
-      var body = jsonDecode(response.body)['data']['story'];
-      return Story.fromJson(body);
+      var errors = jsonDecode(response.body)["errors"];
+      var setUserBookmark =
+          jsonDecode(response.body)["data"]["setUserBookmark"];
+
+      if (errors != null) {
+        return null;
+      }
+      return User.fromJson(setUserBookmark);
     } else {
-      print(response.body);
-      throw Exception("Failed to load Story");
+      throw Exception("Failed to signIn");
     }
   }
+
+  // static Future<Story> createStory(String language, String text) async {
+  //   var create = {
+  //     "query": """mutation{
+  //       createStory(language: $language, text: \"$text\") {
+  //         id
+  //         language
+  //         createdAt
+  //         updatedAt
+  //         firstChapterId
+  //       }
+  //     }"""
+  //   };
+
+  //   debugPrint(create['query'], wrapWidth: 4024);
+
+  //   final response = await http.post(
+  //       Uri.parse('https://writers-live-api.herokuapp.com/'),
+  //       body: jsonEncode(create),
+  //       headers: {"Content-Type": "application/json"});
+
+  //   if (response.statusCode == 200) {
+  //     var body = jsonDecode(response.body)['data']['story'];
+  //     return Story.fromJson(body);
+  //   } else {
+  //     print(response.body);
+  //     throw Exception("Failed to load Story");
+  //   }
+  // }
 }

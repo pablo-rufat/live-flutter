@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:writers/models/User.dart';
 
 class AuthPayload {

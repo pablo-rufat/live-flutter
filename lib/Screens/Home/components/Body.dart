@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:writers/Service.dart';
+import 'package:writers/apiService.dart';
 import 'package:writers/constants.dart';
 import 'package:writers/models/Chapter.dart';
 import 'package:writers/utils.dart';
 
 class Body extends StatefulWidget {
   final AsyncSnapshot<Chapter> snapshot;
-  final bool isBookmark;
-  final Function setBookmark;
 
-  const Body(
-      {Key? key,
-      required this.snapshot,
-      required this.isBookmark,
-      required this.setBookmark})
-      : super(key: key);
+  const Body({Key? key, required this.snapshot}) : super(key: key);
 
   @override
   _BodyState createState() => _BodyState();
@@ -21,6 +16,22 @@ class Body extends StatefulWidget {
 
 class _BodyState extends State<Body> {
   IconData bookmarkIcon = Icons.bookmark_outline;
+  bool isBookmark = false;
+  Service _service = Service();
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (_service.currentUser.user!.bookmark == widget.snapshot.data!.id) {
+      isBookmark = true;
+      bookmarkIcon = Icons.bookmark;
+    }
+  }
+
+  Future<void> setBookmark(String bookmark) async {
+    _service.currentUser.user = await ApiService.setBookmark(bookmark);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,14 +69,15 @@ class _BodyState extends State<Body> {
                         icon: Icon(bookmarkIcon, color: primaryColor),
                         onPressed: () {
                           setState(() {
-                            if (widget.isBookmark) {
+                            if (isBookmark == true) {
                               bookmarkIcon = Icons.bookmark_outline;
-                              widget.setBookmark(false);
+                              isBookmark = false;
+                              setBookmark("remove");
                             } else {
                               bookmarkIcon = Icons.bookmark;
-                              widget.setBookmark(true);
+                              isBookmark = true;
+                              setBookmark(widget.snapshot.data!.id);
                             }
-                            // TODO: SET ICON IF BOOKMARK FROM API
                           });
                         },
                       )
